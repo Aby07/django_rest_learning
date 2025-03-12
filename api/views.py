@@ -15,6 +15,8 @@ from blogs.serializers import BlogSerializer, CommentSerializer
 from .paginations import CustomPagination
 from employees.filters import EmployeeFilter
 from rest_framework.filters import SearchFilter
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 
 
 @api_view(['GET', 'POST'])
@@ -29,7 +31,6 @@ def studentsView(request):
         if serilizers.is_valid(): 
             serilizers.save()
             return Response(serilizers.data, status=status.HTTP_201_CREATED)
-        
         return Response(serilizers.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -58,6 +59,7 @@ def studentDetailView(request, pk):
 #class based view
 
 class Employees(APIView): # class based view
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
     def get(self, request):
         employees = Employee.objects.all()
         serializer = EmployeeSerializer(employees, many=True)
@@ -130,6 +132,7 @@ class MixinEmployeeDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mi
 class GenericEmployee(generics.ListCreateAPIView): #using combiation of list and create
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
+    permission_classes = [IsAuthenticated]
 
     
 # class GenericEmployeeDetail(generics.RetrieveAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
